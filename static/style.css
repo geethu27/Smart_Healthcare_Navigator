@@ -1,0 +1,196 @@
+/* ==========================================================================
+   SMART HEALTHCARE NAVIGATOR - PREMIUM GREEN & BLACK CYBER-CLINICAL THEME
+   High Contrast • Animated UI • Larger Typography • Clean & Neat
+   ========================================================================== */
+
+:root {
+  --bg-black: #060a08;
+  --bg-card: #0c1410;
+  --bg-surface: #121e18;
+  --bg-surface-hover: #192a21;
+  --border-green: #1a3324;
+  --border-green-bright: #10b981;
+  --neon-green: #00ff88;
+  --emerald-glow: rgba(0, 255, 136, 0.2);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-green: #34d399;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-black);
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060a08;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #142e20;
+  border-radius: 9999px;
+  border: 1px solid #1a3a29;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+/* Animations */
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.25), inset 0 0 10px rgba(0, 255, 136, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.45), inset 0 0 15px rgba(0, 255, 136, 0.2);
+  }
+}
+
+@keyframes glow-border {
+  0% { border-color: rgba(16, 185, 129, 0.3); }
+  50% { border-color: rgba(0, 255, 136, 0.8); }
+  100% { border-color: rgba(16, 185, 129, 0.3); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes message-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Ambient green glow backgrounds */
+.ambient-glow {
+  position: relative;
+}
+.ambient-glow::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 30%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Navigation Tabs */
+.tab-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 14px;
+}
+
+.tab-btn.active {
+  color: #00ff88;
+  background: #0f2419;
+  border-color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+/* Quick Prompt Chips */
+.quick-chip {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quick-chip:hover {
+  transform: translateY(-2px);
+  border-color: #00ff88;
+  background: #11241a;
+  color: #00ff88;
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
+}
+
+/* Chat Message Bubbles */
+.chat-bubble-user {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+  border-radius: 1.5rem;
+  border-top-right-radius: 0.35rem;
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3);
+  animation: message-in 0.25s ease-out;
+  border: 1px solid #10b981;
+}
+
+.chat-bubble-ai {
+  background: #0d1712;
+  color: #f1f5f9;
+  border-radius: 1.5rem;
+  border-top-left-radius: 0.35rem;
+  border: 1px solid #1a3325;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+  animation: message-in 0.25s ease-out;
+}
+
+/* Ailment Visual Cards */
+.ailment-card {
+  background: #111e17;
+  border: 1px solid #1b3626;
+  border-radius: 1.1rem;
+  padding: 1.1rem;
+  transition: all 0.25s ease;
+}
+
+.ailment-card:hover {
+  background: #15271e;
+  border-color: #00ff88;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15);
+}
+
+/* Doctor & Card Hover Effects */
+.doctor-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.doctor-card:hover {
+  transform: translateY(-4px);
+  border-color: #10b981;
+  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15);
+}
+
+/* Dialog Modals */
+dialog[open] {
+  animation: modal-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+dialog::backdrop {
+  background: rgba(3, 8, 5, 0.85);
+  backdrop-filter: blur(8px);
+}

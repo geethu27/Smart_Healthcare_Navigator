@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Healthcare Navigator | AI Clinical Bridge & Grounded RAG</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            dark: {
+              base: '#060a08',
+              card: '#0c1410',
+              surface: '#121e18',
+              hover: '#182b21',
+              border: '#1a3324',
+              borderLight: '#264a35'
+            },
+            neon: {
+              green: '#00ff88',
+              emerald: '#10b981',
+              mint: '#34d399',
+              darkGreen: '#047857'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#060a08] text-slate-100 min-h-screen flex flex-col font-sans antialiased ambient-glow selection:bg-emerald-500 selection:text-black">
+
+  <!-- ========================================== -->
+  <!-- TOP HEADER (BLACK & NEON GREEN ACCENTS)    -->
+  <!-- ========================================== -->
+  <header class="bg-[#0a110d]/95 backdrop-blur-md border-b border-[#1a3324] sticky top-0 z-40 shadow-lg shadow-black/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-black flex items-center justify-center text-2xl font-black shadow-lg shadow-emerald-500/30 transform transition hover:scale-105">
+          <i class="fa-solid fa-heart-pulse animate-pulse text-slate-950"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="font-display text-2xl font-extrabold tracking-tight text-white">
+              Smart Healthcare <span class="text-[#00ff88] drop-shadow-[0_0_12px_rgba(0,255,136,0.4)]">Navigator</span>
+            </h1>
+            <span class="inline-flex items-center gap-1.5 text-xs font-extrabold bg-[#0f281b] text-[#00ff88] px-3 py-1 rounded-full border border-[#10b981]/50 shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
+              Grounded RAG Active
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Privacy-First AI • Empathetic Clinical Assistant • Multi-Agent Bridge</p>
+        </div>
+      </div>
+
+      <!-- Live RAG Safety & Operational Status -->
+      <div class="flex items-center gap-4">
+        <div class="hidden md:flex items-center gap-3 bg-[#0d1712] px-4 py-2 rounded-2xl border border-[#1b3627] text-xs text-slate-300 shadow-inner">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-book-medical text-[#00ff88] text-base"></i>
+            <span class="font-bold text-white">6 Verified Guides</span>
+            <span class="text-slate-400 font-mono">(36 Chunks)</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <div class="flex items-center gap-1.5 font-medium">
+            <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+            <span>Gate Threshold:</span>
+            <span id="currentThresholdLabel" class="font-bold text-[#00ff88] font-mono text-sm">0.20</span>
+          </div>
+        </div>
+
+        <button onclick="switchTab('settings')" class="w-10 h-10 rounded-2xl bg-[#0f1b14] border border-[#1b3627] text-slate-300 hover:text-[#00ff88] hover:border-[#00ff88] flex items-center justify-center transition shadow-xs" title="Settings & Models">
+          <i class="fa-solid fa-sliders text-base"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Navigation Tabs Strip -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-[#14261b]">
+      <nav class="flex space-x-2 sm:space-x-3 overflow-x-auto py-2.5 text-sm font-bold scrollbar-none" id="mainTabs">
+        <button onclick="switchTab('chat')" id="tab-btn-chat" class="tab-btn active px-4 py-2 rounded-xl flex items-center gap-2.5 text-[#00ff88] bg-[#0f2419] border border-[#10b981] transition shadow-xs">
+          <i class="fa-solid fa-comment-medical text-base"></i> Symptom Navigator
+        </button>
+        <button onclick="switchTab('inspector')" id="tab-btn-inspector" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2.5 text-slate-300 hover:text-white hover:bg-[#111e17] border border-transparent transition">
+          <i class="fa-solid fa-shield-halved text-base text-emerald-400"></i> RAG Safety Inspector
+        </button>
+        <button onclick="switchTab('hospital')" id="tab-btn-hospital" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2.5 text-slate-300 hover:text-white hover:bg-[#111e17] border border-transparent transition">
+          <i class="fa-solid fa-hospital-user text-base text-emerald-400"></i> Specialist Booking <span class="bg-[#153423] text-[#00ff88] text-[11px] px-2 py-0.5 rounded font-extrabold border border-[#10b981]/40">L2</span>
+        </button>
+        <button onclick="switchTab('doctor')" id="tab-btn-doctor" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2.5 text-slate-300 hover:text-white hover:bg-[#111e17] border border-transparent transition">
+          <i class="fa-solid fa-file-medical text-base text-teal-400"></i> Doctor Handoff <span class="bg-[#153423] text-[#00ff88] text-[11px] px-2 py-0.5 rounded font-extrabold border border-[#10b981]/40">L3</span>
+        </button>
+        <button onclick="switchTab('lab')" id="tab-btn-lab" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2.5 text-slate-300 hover:text-white hover:bg-[#111e17] border border-transparent transition">
+          <i class="fa-solid fa-flask-vial text-base text-mint-400"></i> Lab Report Analyzer <span class="bg-[#153423] text-[#00ff88] text-[11px] px-2 py-0.5 rounded font-extrabold border border-[#10b981]/40">L4</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: SYMPTOM NAVIGATOR (CHAT & RAG)     -->
+    <!-- ========================================== -->
+    <section id="tab-chat" class="tab-pane active">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Conversational Assistant (8 Columns) -->
+        <div class="lg:col-span-8 bg-[#0c1410] rounded-3xl border border-[#1b3627] shadow-2xl flex flex-col h-[780px] overflow-hidden">
+          
+          <!-- Chat Card Header -->
+          <div class="px-6 py-4 border-b border-[#193324] bg-gradient-to-r from-[#0d1813] via-[#0f1c16] to-[#0d1813] flex items-center justify-between">
+            <div class="flex items-center gap-3.5">
+              <div class="relative">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-black flex items-center justify-center font-bold text-lg shadow-md shadow-emerald-500/20">
+                  <i class="fa-solid fa-user-doctor"></i>
+                </div>
+                <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#00ff88] rounded-full border-2 border-[#0c1410]"></span>
+              </div>
+              <div>
+                <h2 class="text-base font-bold text-white flex items-center gap-2.5">
+                  Clinical Intake Assistant
+                  <span class="text-xs font-extrabold bg-[#132c1e] text-[#00ff88] px-2.5 py-0.5 rounded-full border border-emerald-500/40">Patient-Facing</span>
+                </h2>
+                <p class="text-xs text-slate-400">Listens contextually • Strictly non-diagnostic • Grounded in verified protocols</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="clearChat()" class="text-xs font-semibold text-slate-400 hover:text-rose-400 px-3 py-1.5 rounded-xl hover:bg-[#1f1316] border border-transparent hover:border-rose-900/60 transition flex items-center gap-1.5" title="Restart conversation">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Reset Chat</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Symptom Prompts Pill Bar -->
+          <div class="px-5 py-3 bg-[#0a120e] border-b border-[#162d20] flex items-center gap-2.5 overflow-x-auto scrollbar-none">
+            <span class="text-[#00ff88] font-extrabold uppercase text-xs tracking-wider whitespace-nowrap flex items-center gap-1.5">
+              <i class="fa-solid fa-bolt text-amber-400"></i> Try:
+            </span>
+            <button onclick="insertPrompt('What are common symptoms associated with fever?')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#0f1b14] border border-[#1c3a29] rounded-full text-slate-200 text-xs font-semibold hover:border-[#00ff88] transition whitespace-nowrap">
+              <span>🤒</span> Fever & Chills
+            </button>
+            <button onclick="insertPrompt('I have had a bad cough and sore throat for 3 days')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#0f1b14] border border-[#1c3a29] rounded-full text-slate-200 text-xs font-semibold hover:border-[#00ff88] transition whitespace-nowrap">
+              <span>🫁</span> Cough & Sore Throat
+            </button>
+            <button onclick="insertPrompt('My stomach is cramping and I feel nauseous after eating')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#0f1b14] border border-[#1c3a29] rounded-full text-slate-200 text-xs font-semibold hover:border-[#00ff88] transition whitespace-nowrap">
+              <span>🤢</span> Stomach Pain & Nausea
+            </button>
+            <button onclick="insertPrompt('I have an itchy red rash on my arms')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#0f1b14] border border-[#1c3a29] rounded-full text-slate-200 text-xs font-semibold hover:border-[#00ff88] transition whitespace-nowrap">
+              <span>🩹</span> Skin Rash & Itch
+            </button>
+            <button onclick="insertPrompt('I have a throbbing headache and sensitive to light')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#0f1b14] border border-[#1c3a29] rounded-full text-slate-200 text-xs font-semibold hover:border-[#00ff88] transition whitespace-nowrap">
+              <span>🤕</span> Headache / Migraine
+            </button>
+            <button onclick="insertPrompt('What are the symptoms of a rare neurological disorder?')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#181a0e] border border-amber-500/50 rounded-full text-amber-300 text-xs font-semibold hover:border-amber-400 transition whitespace-nowrap" title="Test safe out-of-corpus fallback">
+              <span>⚠️</span> Rare Condition (Fallback)
+            </button>
+            <button onclick="insertPrompt('Who is the Prime Minister of India?')" class="quick-chip flex items-center gap-2 px-3.5 py-1.5 bg-[#1f1214] border border-rose-500/50 rounded-full text-rose-300 text-xs font-semibold hover:border-rose-400 transition whitespace-nowrap" title="Test out-of-domain rejection">
+              <span>🛑</span> Non-Health Query
+            </button>
+          </div>
+
+          <!-- Chat Conversation Scroll Area -->
+          <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-6 bg-gradient-to-b from-[#0a110e] via-[#0b1410] to-[#0c1611]">
+            
+            <!-- Initial Greeting Bubble -->
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-black flex-shrink-0 flex items-center justify-center text-base shadow-md shadow-emerald-500/20 font-bold">
+                <i class="fa-solid fa-stethoscope"></i>
+              </div>
+              <div class="chat-bubble-ai p-6 max-w-[88%] text-[15px] text-slate-200 leading-relaxed shadow-lg border border-[#1b3828]">
+                <p class="font-display font-extrabold text-white mb-2 text-lg flex items-center gap-2">
+                  Welcome! How can I assist you with your health today?
+                </p>
+                <p class="text-slate-300 mb-3.5 text-[15px]">
+                  I am your Smart Healthcare Navigator. I'm here to listen to your symptoms, translate complex medical jargon into clear 8th-grade language, suggest 3 possible common ailments, and help connect you to qualified doctors.
+                </p>
+                
+                <div class="bg-[#102419] border border-[#10b981]/50 rounded-2xl p-4 text-xs sm:text-sm text-emerald-200 mb-3.5 flex items-start gap-3">
+                  <i class="fa-solid fa-shield-check text-[#00ff88] mt-0.5 text-base"></i>
+                  <div>
+                    <strong class="font-bold text-[#00ff88]">Grounded in Verified Medical Documents:</strong>
+                    I strictly evaluate symptoms based on verified clinical guidelines (CDC, WHO, NHS). If a question is not in my medical knowledge base, I will safely state that the information is unavailable rather than guess.
+                  </div>
+                </div>
+
+                <p class="text-xs text-slate-400 italic">
+                  💡 Type your symptoms below (e.g. fever, cough, stomach pain, headache) or click any prompt pill above to test.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Chat Input Footer -->
+          <div class="p-4 border-t border-[#193324] bg-[#0c1410]">
+            <form id="chatForm" onsubmit="handleSendChat(event)" class="flex items-center gap-3">
+              <div class="relative flex-1">
+                <input type="text" id="chatInput" placeholder="Describe your symptoms (e.g. 'I have a headache and sore throat for 2 days')..." class="w-full pl-5 pr-12 py-3.5 bg-[#0f1b14] hover:bg-[#122219] focus:bg-[#14261c] border border-[#1e3d2b] focus:border-[#00ff88] rounded-2xl text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#00ff88]/30 transition shadow-inner" autocomplete="off" required>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                  <i class="fa-solid fa-keyboard text-sm"></i>
+                </div>
+              </div>
+              <button type="submit" id="sendBtn" class="px-7 py-3.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-black text-sm font-extrabold rounded-2xl flex items-center gap-2.5 shadow-lg shadow-emerald-500/25 active:scale-95 transition">
+                <span>Send</span>
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right: Live RAG Evaluation & Confidence Gauge (4 Columns) -->
+        <div class="lg:col-span-4 bg-[#0c1410] rounded-3xl border border-[#1b3627] p-6 shadow-2xl flex flex-col justify-between h-[780px] overflow-y-auto">
+          <div class="space-y-5">
+            
+            <!-- Panel Header -->
+            <div class="flex items-center justify-between pb-3.5 border-b border-[#193324]">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-[#11271b] border border-[#1b3c29] text-[#00ff88] flex items-center justify-center text-sm font-bold shadow-xs">
+                  <i class="fa-solid fa-gauge-high"></i>
+                </div>
+                <h3 class="font-display font-extrabold text-white text-base">RAG Safety Gauge</h3>
+              </div>
+              <span id="diagnosticStatus" class="text-xs font-bold px-3 py-1 rounded-full bg-[#11241a] text-[#00ff88] border border-[#10b981]/50">
+                Ready
+              </span>
+            </div>
+
+            <!-- Intent Classifier Box -->
+            <div class="p-4 bg-[#0f1b14] rounded-2xl border border-[#1c3828]">
+              <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <span>Classified Intent</span>
+                <i class="fa-solid fa-network-wired text-[#00ff88]"></i>
+              </div>
+              <div id="diagIntent" class="text-base font-extrabold text-white flex items-center gap-2">
+                Awaiting query...
+              </div>
+              <div id="diagRouting" class="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-turn-down-right text-xs text-emerald-500"></i>
+                <span>Route: Standing by</span>
+              </div>
+            </div>
+
+            <!-- Vector Similarity & Confidence Meter Card -->
+            <div class="p-5 bg-gradient-to-br from-[#0f1b14] via-[#102219] to-[#0c1712] rounded-2xl border border-[#1c3a29] shadow-inner">
+              <div class="flex justify-between items-center text-xs mb-2.5">
+                <span class="font-extrabold text-slate-200 uppercase tracking-wider text-xs">Vector Similarity</span>
+                <span id="diagScoreText" class="font-mono font-extrabold text-[#00ff88] bg-[#08120d] px-2.5 py-1 rounded-lg border border-[#1b3a28] text-sm">
+                  0.000 / 0.20
+                </span>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="w-full bg-[#08120d] rounded-full h-3.5 p-0.5 overflow-hidden border border-[#1a3827]">
+                <div id="diagScoreBar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-[#00ff88] h-2.5 rounded-full transition-all duration-700 ease-out shadow-[0_0_12px_rgba(0,255,136,0.6)]" style="width: 0%"></div>
+              </div>
+
+              <div class="flex justify-between text-[11px] text-slate-400 mt-2.5 font-medium">
+                <span>0.0 (Unrelated)</span>
+                <span class="text-[#00ff88] font-bold bg-[#11271b] px-2 py-0.5 rounded border border-[#10b981]/40">
+                  Gate: <span id="diagThresholdValue">0.20</span>
+                </span>
+                <span>1.0 (Exact)</span>
+              </div>
+            </div>
+
+            <!-- Grounded RAG Decision Box -->
+            <div id="diagDecisionBox" class="p-4 rounded-2xl border border-[#1c3828] bg-[#0e1913] transition-colors duration-300">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved text-xs text-[#00ff88]"></i> Grounding Verification
+              </div>
+              <div id="diagDecisionText" class="text-xs font-semibold text-slate-300 leading-relaxed">
+                No query evaluated yet. Ask a question to see live grounding verification.
+              </div>
+            </div>
+
+            <!-- Verified Sources List -->
+            <div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span>Verified Sources Cited</span>
+                <i class="fa-solid fa-file-shield text-emerald-400"></i>
+              </div>
+              <div id="diagSourcesList" class="text-xs text-slate-300 space-y-2">
+                <div class="p-3 bg-[#0f1b14] rounded-xl border border-[#1a3627] text-slate-500 italic text-xs">
+                  No sources cited yet
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Direct Navigation Shortcuts -->
+          <div class="pt-5 border-t border-[#193324] space-y-2.5 mt-5">
+            <button onclick="switchTab('doctor'); requestIntakeHandoff();" class="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black text-xs font-extrabold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition">
+              <i class="fa-solid fa-file-medical"></i> Generate Doctor Handoff (SOAP)
+            </button>
+            <button onclick="switchTab('hospital')" class="w-full py-3 px-4 bg-[#0f2217] hover:bg-[#153021] text-[#00ff88] text-xs font-bold rounded-2xl border border-[#10b981]/50 flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-calendar-check"></i> Book Appointment with Specialist
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: RAG SAFETY INSPECTOR               -->
+    <!-- ========================================== -->
+    <section id="tab-inspector" class="tab-pane hidden space-y-6">
+      <div class="bg-[#0c1410] rounded-3xl border border-[#1b3627] p-7 sm:p-9 shadow-2xl">
+        
+        <div class="max-w-3xl mb-8">
+          <div class="inline-flex items-center gap-2 text-xs font-extrabold bg-[#11271b] text-[#00ff88] px-3.5 py-1.5 rounded-full border border-[#10b981]/50 mb-3">
+            <i class="fa-solid fa-shield-halved"></i> Retrieval Confidence Gating Architecture
+          </div>
+          <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            How Smart Healthcare Navigator Prevents Hallucinations
+          </h2>
+          <p class="text-base text-slate-300 mt-2 leading-relaxed">
+            The system acts as a deterministic firewall between the patient and the LLM. 
+            Before the language model is ever invoked, the query must pass strict intent classification and clear the retrieval confidence threshold.
+          </p>
+        </div>
+
+        <!-- Interactive Flowchart Diagram -->
+        <div class="p-7 bg-[#080d0a] text-white rounded-3xl shadow-2xl overflow-x-auto border border-[#183324]">
+          <div class="flex items-center justify-between min-w-[800px] gap-3 text-xs">
+            
+            <div class="bg-[#0e1813] p-5 rounded-2xl border border-[#1b3828] text-center w-44 flex flex-col items-center">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-[#00ff88] flex items-center justify-center text-lg mb-2.5">
+                <i class="fa-solid fa-message"></i>
+              </div>
+              <div class="font-bold text-white text-sm mb-0.5">User Question</div>
+              <div class="text-slate-400 text-xs">Natural language</div>
+            </div>
+
+            <i class="fa-solid fa-arrow-right text-[#00ff88] text-base"></i>
+
+            <div class="bg-[#0e1813] p-5 rounded-2xl border border-[#1b3828] text-center w-48 flex flex-col items-center">
+              <div class="w-10 h-10 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-lg mb-2.5">
+                <i class="fa-solid fa-filter"></i>
+              </div>
+              <div class="font-bold text-white text-sm mb-0.5">Intent Classifier</div>
+              <div class="text-slate-400 text-xs">Healthcare vs Appt vs Reject</div>
+            </div>
+
+            <i class="fa-solid fa-arrow-right text-[#00ff88] text-base"></i>
+
+            <div class="bg-[#0e1813] p-5 rounded-2xl border border-[#1b3828] text-center w-48 flex flex-col items-center">
+              <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-lg mb-2.5">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+              </div>
+              <div class="font-bold text-white text-sm mb-0.5">Vector Retrieval</div>
+              <div class="text-slate-400 text-xs">TF-IDF + Cosine Search</div>
+            </div>
+
+            <i class="fa-solid fa-arrow-right text-[#00ff88] text-base"></i>
+
+            <div class="bg-[#122219] p-5 rounded-2xl border border-[#00ff88]/60 text-center w-52 flex flex-col items-center shadow-lg shadow-emerald-500/15">
+              <div class="w-10 h-10 rounded-2xl bg-[#00ff88]/20 text-[#00ff88] flex items-center justify-center text-lg mb-2.5">
+                <i class="fa-solid fa-gauge-high"></i>
+              </div>
+              <div class="font-bold text-[#00ff88] text-sm mb-0.5">Confidence Gate</div>
+              <div class="text-slate-200 text-xs font-mono font-bold">Score &gt;= 0.20?</div>
+            </div>
+
+            <i class="fa-solid fa-arrow-right text-[#00ff88] text-base"></i>
+
+            <div class="flex flex-col gap-3">
+              <div class="bg-[#0d2b1a] border border-[#00ff88] p-3 rounded-2xl text-[#00ff88] text-xs font-extrabold text-center flex items-center gap-2 shadow-md">
+                <i class="fa-solid fa-circle-check text-sm"></i>
+                <span>YES → Grounded RAG + Citations</span>
+              </div>
+              <div class="bg-[#261014] border border-rose-500 p-3 rounded-2xl text-rose-300 text-xs font-extrabold text-center flex items-center gap-2 shadow-md">
+                <i class="fa-solid fa-circle-xmark text-sm"></i>
+                <span>NO → Safe Fallback ("Don't guess")</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Verified Documents Loaded -->
+        <div class="mt-9">
+          <h3 class="text-base font-extrabold text-white mb-4 flex items-center gap-2.5">
+            <i class="fa-solid fa-folder-closed text-[#00ff88]"></i> Loaded Verified Clinical Guidelines
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="corpusDocsList">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Last Retrieved Chunks Viewer -->
+        <div class="mt-9">
+          <h3 class="text-base font-extrabold text-white mb-4 flex items-center gap-2.5">
+            <i class="fa-solid fa-layer-group text-teal-400"></i> Retrieved Knowledge Chunks for Last Query
+          </h3>
+          <div id="inspectorChunks" class="space-y-4">
+            <div class="p-7 bg-[#0a120e] border border-[#1a3325] rounded-3xl text-sm text-slate-400 text-center italic">
+              Ask any question in the Symptom Navigator tab to view the live retrieved chunks here.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: HOSPITAL BOOKING (LEVEL 2)         -->
+    <!-- ========================================== -->
+    <section id="tab-hospital" class="tab-pane hidden space-y-6">
+      <div class="bg-[#0c1410] rounded-3xl border border-[#1b3627] p-7 sm:p-9 shadow-2xl">
+        
+        <div class="flex flex-wrap items-center justify-between gap-5 pb-7 border-b border-[#183324]">
+          <div>
+            <div class="inline-flex items-center gap-2 text-xs font-extrabold bg-[#11271b] text-[#00ff88] px-3.5 py-1.5 rounded-full border border-[#10b981]/50 mb-3">
+              <i class="fa-solid fa-hospital-user"></i> Level 2: Tool Integration
+            </div>
+            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Hospital Specialist Directory & Direct Booking
+            </h2>
+            <p class="text-sm sm:text-base text-slate-300 mt-1">
+              Autonomous healthcare navigation connects symptom reasoning with care delivery, finding specialists and booking slots.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="text-xs sm:text-sm font-bold text-slate-300">Filter Specialty:</label>
+            <select id="specialtyFilter" onchange="loadSpecialists()" class="text-xs sm:text-sm font-semibold border border-[#1e3c2b] rounded-xl px-4 py-2.5 bg-[#0e1a14] text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40 transition shadow-sm">
+              <option value="">All Verified Specialists</option>
+              <option value="Dermatologist">Dermatology (Skin & Rash)</option>
+              <option value="General Physician">General & Family Medicine</option>
+              <option value="Pulmonologist">Pulmonology (Lungs & Cough)</option>
+              <option value="Gastroenterologist">Gastroenterology (Stomach & Digestion)</option>
+              <option value="Neurologist">Neurology (Headaches & Cranial)</option>
+              <option value="ENT Specialist">Ear, Nose & Throat (ENT)</option>
+              <option value="Hematologist">Hematology (Blood & Iron)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Specialists Grid -->
+        <div id="specialistsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-7">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: DOCTOR-FACING HANDOFF (LEVEL 3)     -->
+    <!-- ========================================== -->
+    <section id="tab-doctor" class="tab-pane hidden space-y-6">
+      <div class="bg-[#0c1410] rounded-3xl border border-[#1b3627] p-7 sm:p-9 shadow-2xl">
+        
+        <div class="flex flex-wrap items-center justify-between gap-5 pb-7 border-b border-[#183324]">
+          <div>
+            <div class="inline-flex items-center gap-2 text-xs font-extrabold bg-[#11271b] text-[#00ff88] px-3.5 py-1.5 rounded-full border border-[#10b981]/50 mb-3">
+              <i class="fa-solid fa-handshake-angle"></i> Level 3: Multi-Agent Collaboration
+            </div>
+            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Pre-Consultation Clinical Handoff (SOAP & FHIR)
+            </h2>
+            <p class="text-sm sm:text-base text-slate-300 mt-1">
+              The <strong>Patient Intake Agent</strong> chats with the patient, extracting structured timeline and severity, then hands off to the <strong>Doctor-Facing Agent</strong>, saving physicians ~15 minutes of manual chart review.
+            </p>
+          </div>
+
+          <button onclick="requestIntakeHandoff()" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-black text-xs sm:text-sm font-extrabold rounded-2xl flex items-center gap-2.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition">
+            <i class="fa-solid fa-arrows-rotate"></i> Re-Synthesize from Chat History
+          </button>
+        </div>
+
+        <!-- Dual Column View -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-7">
+          
+          <!-- Left: SOAP Clinical Note -->
+          <div class="flex flex-col bg-[#070d0a] rounded-3xl p-6 border border-[#193325] shadow-2xl">
+            <div class="flex items-center justify-between pb-3.5 border-b border-[#183325] mb-3.5">
+              <div class="flex items-center gap-2.5 text-[#00ff88] font-bold text-sm">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span class="text-white font-display text-base">Physician SOAP Clinical Note</span>
+              </div>
+              <button onclick="copySoapNote()" class="text-xs bg-[#11241a] hover:bg-[#183525] text-[#00ff88] px-3.5 py-1.5 rounded-xl border border-[#1b3a29] transition flex items-center gap-1.5 font-bold">
+                <i class="fa-regular fa-copy"></i> Copy Note
+              </button>
+            </div>
+            <pre id="soapNoteBox" class="text-slate-200 text-xs sm:text-sm font-mono whitespace-pre-wrap leading-relaxed flex-1 h-[540px] overflow-y-auto scrollbar-none">
+Click "Re-Synthesize from Chat History" above to generate SOAP summary...
+            </pre>
+          </div>
+
+          <!-- Right: FHIR Machine-Usable JSON -->
+          <div class="flex flex-col bg-[#070d0a] rounded-3xl p-6 border border-[#193325] shadow-2xl">
+            <div class="flex items-center justify-between pb-3.5 border-b border-[#183325] mb-3.5">
+              <div class="flex items-center gap-2.5 text-[#00ff88] font-bold text-sm">
+                <i class="fa-solid fa-code"></i>
+                <span class="text-white font-display text-base">Machine-Usable JSON (FHIR Aligned)</span>
+              </div>
+              <button onclick="copyFhirJson()" class="text-xs bg-[#11241a] hover:bg-[#183525] text-[#00ff88] px-3.5 py-1.5 rounded-xl border border-[#1b3a29] transition flex items-center gap-1.5 font-bold">
+                <i class="fa-regular fa-copy"></i> Copy JSON
+              </button>
+            </div>
+            <pre id="fhirJsonBox" class="text-emerald-400 text-xs sm:text-sm font-mono whitespace-pre-wrap leading-relaxed flex-1 h-[540px] overflow-y-auto scrollbar-none">
+{
+  "status": "awaiting_intake"
+}
+            </pre>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: LAB REPORT ANALYZER (LEVEL 4)       -->
+    <!-- ========================================== -->
+    <section id="tab-lab" class="tab-pane hidden space-y-6">
+      <div class="bg-[#0c1410] rounded-3xl border border-[#1b3627] p-7 sm:p-9 shadow-2xl">
+        
+        <div class="flex flex-wrap items-center justify-between gap-5 pb-7 border-b border-[#183324]">
+          <div>
+            <div class="inline-flex items-center gap-2 text-xs font-extrabold bg-[#11271b] text-[#00ff88] px-3.5 py-1.5 rounded-full border border-[#10b981]/50 mb-3">
+              <i class="fa-solid fa-flask-vial"></i> Level 4: Advanced / Multimodal
+            </div>
+            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Blood Panel Analyzer & Plain-Language Jargon Translation
+            </h2>
+            <p class="text-sm sm:text-base text-slate-300 mt-1">
+              Uploads CBC / Iron panel PDFs, extracts numerical biomarkers, flags low iron, explains findings in 8th-grade language, and suggests evidence-based dietary modifications.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="loadSampleReport('low_iron')" class="px-5 py-2.5 bg-[#1b1718] hover:bg-[#251d1f] text-rose-300 text-xs sm:text-sm font-bold rounded-2xl border border-rose-500/50 flex items-center gap-2 transition shadow-sm">
+              <i class="fa-solid fa-file-pdf text-rose-400"></i> Load Low-Iron CBC Panel
+            </button>
+            <button onclick="loadSampleReport('normal')" class="px-5 py-2.5 bg-[#0f2419] hover:bg-[#153423] text-[#00ff88] text-xs sm:text-sm font-bold rounded-2xl border border-[#10b981]/50 flex items-center gap-2 transition shadow-sm">
+              <i class="fa-solid fa-file-pdf text-emerald-400"></i> Load Normal CBC Panel
+            </button>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Upload Zone -->
+        <div class="mt-7 border-2 border-dashed border-[#1e3c2b] hover:border-[#00ff88] rounded-3xl p-9 text-center bg-[#09110d] hover:bg-[#0c1812] transition cursor-pointer group" onclick="document.getElementById('labFileInput').click()">
+          <input type="file" id="labFileInput" accept=".pdf,.txt" class="hidden" onchange="handleFileUpload(event)">
+          <div class="w-16 h-16 rounded-2xl bg-[#11241a] text-[#00ff88] flex items-center justify-center text-3xl mx-auto mb-3.5 group-hover:scale-110 transition shadow-md border border-[#1b3a28]">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <h3 class="text-base font-extrabold text-white">Upload Patient Blood Test Report</h3>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Supports PDF or Text reports (e.g. Complete Blood Count, Serum Iron, Ferritin)</p>
+          <span class="inline-block mt-3.5 px-4 py-1.5 bg-[#102217] border border-[#1c3a28] rounded-full text-xs font-bold text-[#00ff88] shadow-xs">
+            Browse File
+          </span>
+        </div>
+
+        <!-- Results Display Container -->
+        <div id="labResultsContainer" class="hidden mt-9 space-y-6">
+          
+          <!-- Summary Banner -->
+          <div id="labBanner" class="p-6 rounded-3xl border flex flex-wrap items-center justify-between gap-4">
+            <!-- Injected by JS -->
+          </div>
+
+          <!-- Biomarkers Table -->
+          <div>
+            <h3 class="text-base font-extrabold text-white mb-3.5 flex items-center gap-2.5">
+              <i class="fa-solid fa-table-list text-[#00ff88]"></i> Extracted Biomarkers vs. Reference Intervals
+            </h3>
+            <div class="overflow-x-auto rounded-3xl border border-[#1b3627] shadow-xl">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-[#09120d] text-slate-300 uppercase font-bold tracking-wider text-xs border-b border-[#1b3627]">
+                  <tr>
+                    <th class="py-3.5 px-5">Biomarker</th>
+                    <th class="py-3.5 px-5">Patient Result</th>
+                    <th class="py-3.5 px-5">Status Flag</th>
+                    <th class="py-3.5 px-5">Standard Range</th>
+                    <th class="py-3.5 px-5">Biological Role</th>
+                  </tr>
+                </thead>
+                <tbody id="labBiomarkersTable" class="divide-y divide-[#162c1f] bg-[#0c1410] font-medium text-slate-200">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Plain Language Translation Card (8th-Grade Level) -->
+          <div class="p-7 bg-gradient-to-br from-[#0c1813] via-[#0e1d16] to-[#09120d] border border-[#1c3829] rounded-3xl shadow-xl">
+            <div class="flex items-center gap-3 text-[#00ff88] font-bold text-base mb-3.5">
+              <div class="w-9 h-9 rounded-xl bg-[#11241a] text-[#00ff88] flex items-center justify-center text-sm shadow-xs border border-[#1a3828]">
+                <i class="fa-solid fa-comment-medical"></i>
+              </div>
+              <h3 class="font-display text-lg font-extrabold text-white">Plain Language Jargon Translation (8th-Grade Reading Level)</h3>
+            </div>
+            <div id="labPlainExplanation" class="text-sm text-slate-300 leading-relaxed space-y-3.5">
+              <!-- Explanation content -->
+            </div>
+          </div>
+
+          <!-- Dietary Guidance & Nutrition Cards -->
+          <div class="p-7 bg-gradient-to-br from-[#121c16] via-[#101914] to-[#09120d] border border-[#1c3829] rounded-3xl shadow-xl">
+            <div class="flex items-center gap-3 text-emerald-400 font-bold text-base mb-3.5">
+              <div class="w-9 h-9 rounded-xl bg-[#11241a] text-[#00ff88] flex items-center justify-center text-sm shadow-xs border border-[#1a3828]">
+                <i class="fa-solid fa-carrot"></i>
+              </div>
+              <h3 class="font-display text-lg font-extrabold text-white">Actionable Evidence-Based Nutrition Adjustments</h3>
+            </div>
+            <ul id="labDietaryList" class="text-sm text-slate-300 space-y-3 list-disc pl-5">
+              <!-- Dietary recommendations -->
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: SETTINGS                           -->
+    <!-- ========================================== -->
+    <section id="tab-settings" class="tab-pane hidden space-y-6">
+      <div class="bg-[#0c1410] rounded-3xl border border-[#1b3627] p-7 sm:p-9 shadow-2xl max-w-2xl mx-auto">
+        
+        <div class="pb-5 border-b border-[#183324] mb-7">
+          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">System Configuration & Models</h2>
+          <p class="text-sm text-slate-400 mt-1">Configure generation backend, retrieval thresholds, and test profiles.</p>
+        </div>
+
+        <form id="settingsForm" onsubmit="saveSettings(event)" class="space-y-6 text-sm">
+          
+          <!-- LLM Provider Selection -->
+          <div>
+            <label class="block font-bold text-white mb-2.5 text-base">LLM Generation Backend</label>
+            <div class="space-y-3.5">
+              <label class="flex items-start gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-[#101d16] transition border-[#00ff88] bg-[#0e1a14]">
+                <input type="radio" name="provider" value="local" checked class="mt-1 accent-[#00ff88]">
+                <div>
+                  <div class="font-bold text-white text-base">Local Grounded Engine (Active & Default)</div>
+                  <div class="text-xs sm:text-sm text-slate-400 mt-1">100% Offline • Zero Hallucinations • Strict Context Grounding • Zero Token Costs</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-[#101d16] transition border-[#1c3828]">
+                <input type="radio" name="provider" value="gemini" class="mt-1 accent-[#00ff88]">
+                <div>
+                  <div class="font-bold text-white text-base">Google Gemini 1.5 Flash</div>
+                  <div class="text-xs sm:text-sm text-slate-400 mt-1">Connects via Google Gemini REST API with strict safety system prompt</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-[#101d16] transition border-[#1c3828]">
+                <input type="radio" name="provider" value="ollama" class="mt-1 accent-[#00ff88]">
+                <div>
+                  <div class="font-bold text-white text-base">Ollama (Local Open-Source LLM)</div>
+                  <div class="text-xs sm:text-sm text-slate-400 mt-1">Runs Llama 3, Mistral, BioMistral, or Phi-3 locally • 100% Private • Zero API Costs • http://localhost:11434</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-[#101d16] transition border-[#1c3828]">
+                <input type="radio" name="provider" value="openai" class="mt-1 accent-[#00ff88]">
+                <div>
+                  <div class="font-bold text-white text-base">OpenAI GPT-4o-mini</div>
+                  <div class="text-xs sm:text-sm text-slate-400 mt-1">Connects via OpenAI API key with non-diagnostic boundaries</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ollama Model Input -->
+          <div id="ollamaModelGroup" class="hidden">
+            <label class="block font-bold text-white mb-1.5 text-sm sm:text-base">Ollama Model Name</label>
+            <input type="text" id="ollamaModelInput" value="llama3" placeholder="e.g. llama3, mistral, biomistral, phi3" class="w-full px-4 py-3 bg-[#08100c] border border-[#1c3828] rounded-xl text-sm text-white focus:ring-2 focus:ring-[#00ff88]/40">
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Make sure Ollama is installed and running on your machine (e.g. <code class="text-[#00ff88] bg-[#0c1611] px-1.5 py-0.5 rounded">ollama run llama3</code>).
+            </p>
+          </div>
+
+          <!-- API Key Input -->
+          <div id="apiKeyGroup" class="hidden">
+            <label class="block font-bold text-white mb-1.5 text-sm sm:text-base">API Key for External Provider</label>
+            <input type="password" id="apiKeyInput" placeholder="Enter API key..." class="w-full px-4 py-3 bg-[#08100c] border border-[#1c3828] rounded-xl text-sm text-white focus:ring-2 focus:ring-[#00ff88]/40">
+          </div>
+
+          <!-- Retrieval Confidence Threshold Slider -->
+          <div class="p-5 bg-[#09110d] rounded-2xl border border-[#1a3325]">
+            <div class="flex justify-between items-center mb-2.5">
+              <label class="font-bold text-white text-sm sm:text-base">Retrieval Confidence Threshold Gate</label>
+              <span id="thresholdDisplay" class="font-mono font-extrabold text-[#00ff88] bg-[#0c1611] px-3 py-1 rounded-xl border border-[#1b3a28] text-sm">
+                0.20
+              </span>
+            </div>
+            <input type="range" id="thresholdSlider" min="0.05" max="0.45" step="0.01" value="0.20" class="w-full accent-[#00ff88] cursor-pointer" oninput="updateThresholdLabel(this.value)">
+            <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+              Queries scoring below this threshold safely trigger: <em>"I don't have enough verified information in my medical knowledge base..."</em>
+            </p>
+          </div>
+
+          <!-- Patient Profile -->
+          <div>
+            <label class="block font-bold text-white mb-1.5 text-sm sm:text-base">Patient Identifier Name</label>
+            <input type="text" id="patientNameInput" value="Alex Morgan" class="w-full px-4 py-3 bg-[#09110d] border border-[#1c3828] rounded-xl text-sm text-white focus:ring-2 focus:ring-[#00ff88]/40">
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-black font-extrabold rounded-2xl text-sm shadow-lg shadow-emerald-500/25 active:scale-98 transition">
+            Save System Settings
+          </button>
+        </form>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Appointment Booking Modal (Dialog) -->
+  <dialog id="bookingDialog" class="rounded-3xl p-0 backdrop:bg-black/85 max-w-lg w-full shadow-2xl border border-[#1b3627] bg-[#0c1410] text-slate-100">
+    <div class="p-7">
+      <div class="flex justify-between items-center pb-4 border-b border-[#183324]">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#11241a] border border-[#1b3a28] text-[#00ff88] flex items-center justify-center text-base font-bold">
+            <i class="fa-solid fa-calendar-plus"></i>
+          </div>
+          <h3 class="font-display font-bold text-white text-lg">Schedule Clinic Appointment</h3>
+        </div>
+        <button onclick="document.getElementById('bookingDialog').close()" class="w-8 h-8 rounded-full text-slate-400 hover:text-white hover:bg-[#15251c] flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <form id="bookingModalForm" onsubmit="handleExecuteBooking(event)" class="space-y-4 mt-5 text-sm">
+        <input type="hidden" id="modalDoctorId">
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5 text-xs uppercase tracking-wider">Selected Specialist</label>
+          <div id="modalDoctorName" class="p-3.5 bg-[#0e1b14] border border-[#1c3828] rounded-xl font-bold text-[#00ff88] flex items-center gap-2.5">
+            <i class="fa-solid fa-user-doctor text-emerald-400"></i>
+            <span>Dr. Aisha Patel (Dermatologist)</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1.5 text-xs uppercase tracking-wider">Date</label>
+            <input type="date" id="modalDateInput" class="w-full p-3 bg-[#08100c] border border-[#1c3828] rounded-xl text-white font-medium focus:ring-2 focus:ring-[#00ff88]/40" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1.5 text-xs uppercase tracking-wider">Time Slot</label>
+            <select id="modalTimeSlotSelect" class="w-full p-3 bg-[#08100c] border border-[#1c3828] rounded-xl text-white font-medium focus:ring-2 focus:ring-[#00ff88]/40" required>
+              <option value="09:30 AM">09:30 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="02:15 PM">02:15 PM</option>
+              <option value="04:00 PM">04:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5 text-xs uppercase tracking-wider">Patient Name</label>
+          <input type="text" id="modalPatientName" value="Alex Morgan" class="w-full p-3 bg-[#08100c] border border-[#1c3828] rounded-xl text-white font-medium focus:ring-2 focus:ring-[#00ff88]/40" required>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5 text-xs uppercase tracking-wider">Symptom Summary for Doctor</label>
+          <textarea id="modalSymptomsSummary" rows="2" class="w-full p-3 bg-[#08100c] border border-[#1c3828] rounded-xl text-white font-medium focus:ring-2 focus:ring-[#00ff88]/40" placeholder="Describe symptoms..."></textarea>
+        </div>
+
+        <div class="pt-3 flex justify-end gap-3">
+          <button type="button" onclick="document.getElementById('bookingDialog').close()" class="px-5 py-2.5 bg-[#121f18] hover:bg-[#182c22] text-slate-300 rounded-xl font-bold transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-black rounded-xl font-extrabold shadow-lg shadow-emerald-500/25 active:scale-95 transition">
+            Confirm Booking
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Booking Confirmation Success Modal -->
+  <dialog id="bookingSuccessDialog" class="rounded-3xl p-0 backdrop:bg-black/85 max-w-md w-full shadow-2xl border border-[#00ff88]/50 bg-[#0c1410] text-slate-100">
+    <div class="p-8 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-[#11271b] border border-[#10b981]/50 text-[#00ff88] text-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h3 class="font-display text-xl font-extrabold text-white mb-1.5">Appointment Confirmed!</h3>
+      <p class="text-xs sm:text-sm text-slate-400 mb-5">Your visit has been logged into the hospital electronic booking registry.</p>
+
+      <div class="bg-[#08100c] p-5 rounded-2xl border border-[#1a3828] text-left text-xs sm:text-sm space-y-2.5 mb-6">
+        <div class="flex justify-between items-center pb-2 border-b border-[#183324]">
+          <span class="text-slate-400">Confirmation Code:</span>
+          <span id="confCode" class="font-mono text-[#00ff88] font-extrabold text-sm"></span>
+        </div>
+        <div><strong class="text-slate-300">Specialist:</strong> <span id="confDoctor" class="text-white"></span></div>
+        <div><strong class="text-slate-300">Date & Time:</strong> <span id="confDateTime" class="text-white"></span></div>
+        <div><strong class="text-slate-300">Location:</strong> <span id="confFacility" class="text-white"></span></div>
+      </div>
+
+      <button onclick="document.getElementById('bookingSuccessDialog').close()" class="w-full py-3 bg-[#11241a] hover:bg-[#183525] border border-[#10b981] text-[#00ff88] rounded-xl text-sm font-extrabold transition">
+        Done
+      </button>
+    </div>
+  </dialog>
+
+  <!-- Footer -->
+  <footer class="bg-[#050807] border-t border-[#14261b] py-4 mt-auto text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="font-bold text-white">Smart Healthcare Navigator AI</span>
+        <span class="text-slate-700">•</span>
+        <span class="text-[#00ff88] font-semibold"><i class="fa-solid fa-lock text-[10px]"></i> Privacy-First Medical RAG</span>
+      </div>
+      <div class="flex items-center gap-3 text-slate-500 text-xs font-semibold">
+        <span>L1: Grounded RAG</span>
+        <span>•</span>
+        <span>L2: Hospital API</span>
+        <span>•</span>
+        <span>L3: SOAP Handoff</span>
+        <span>•</span>
+        <span>L4: Lab OCR</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
