@@ -104,7 +104,7 @@ Smart_healtcare_Navigator/
 
 ### 1. Requirements
 - Python 3.10+ (tested on Python 3.14)
-- Packages already installed in this environment: `fastapi`, `uvicorn`, `scikit-learn`, `PyPDF2`, `reportlab`
+- Packages already installed in this environment: `fastapi`, `uvicorn`, `scikit-learn`, `pypdf`, `reportlab`
 
 ### 2. Run the Server
 Launch the server from the project directory:
@@ -191,3 +191,5 @@ ALL 7 END-TO-END TESTS PASSED SUCCESSFULLY!
 - **Zero-Storage Privacy**: Patient messages and uploaded PDF files are processed in ephemeral memory.
 - **Configurable LLM Backend**: Default operates 100% offline via `LocalGroundedGenerator` with zero telemetry and zero external API calls. Gemini and OpenAI backends can be activated optionally in the Settings tab.
 - **Non-Diagnostic Stance**: Every response includes an explicit medical disclaimer stating that the system provides educational information grounded in reference protocols, not clinical diagnoses or prescriptions.
+#   S m a r t _ H e a l t h c a r e _ N a v i g a t o r  
+ 
